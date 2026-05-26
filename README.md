@@ -34,27 +34,27 @@ A premium, fully-optimized dumpster diving script for **FiveM** servers running 
 ## Features
 
 ### Core Mechanics
-- **Progression & Level System** â€” Automatic database-driven reputation tracking with configurable XP per level
-- **Level Restrictions** â€” Lock trash categories behind level gates (e.g., Dumpsters require Level 3, Suitcases require Level 5)
-- **Reward Scaling** â€” Higher levels yield **more loot** (+3% quantity per level) and **better loot** (improved rare drop chances)
-- **Cooldown System** â€” Configurable per-search cooldown to prevent spam
+- **Progression & Level System** - Automatic database-driven reputation tracking with configurable XP per level
+- **Level Restrictions** - Lock trash categories behind level gates (e.g., Dumpsters require Level 3, Suitcases require Level 5)
+- **Reward Scaling** - Higher levels yield **more loot** (+3% quantity per level) and **better loot** (improved rare drop chances)
+- **Cooldown System** - Configurable per-search cooldown to prevent spam
 
 ### Immersive Gameplay
-- **Micro-Animations** â€” Unique search animations per trash type (dumpsters, bins, bags, suitcases, mailboxes)
-- **Event Hazards** â€” Rat bites, raccoon attacks, and dirty needle pricks with visual effects
-- **Protective Gear** â€” `hobo_gloves` item shields players from needle hazards
-- **Aggressive Tramps** â€” NPCs may attack players who dig through their territory
+- **Micro-Animations** - Unique search animations per trash type (dumpsters, bins, bags, suitcases, mailboxes)
+- **Event Hazards** - Rat bites, raccoon attacks, and dirty needle pricks with visual effects
+- **Protective Gear** - `hobo_gloves` item shields players from needle hazards
+- **Aggressive Tramps** - NPCs may attack players who dig through their territory
 
 ### Loot & Zones
-- **Multi-Tier Loot Tables** â€” Common and rare loot pools per category with configurable rarity thresholds
-- **Exclusive Zones** â€” Location-based loot pools (e.g., Burgershot bins yield food ingredients, Industrial zones yield ores)
-- **Custom Searchables** â€” Suitcases/luggage and mailboxes with unique loot and delete-on-search mechanics
+- **Multi-Tier Loot Tables** - Common and rare loot pools per category with configurable rarity thresholds
+- **Exclusive Zones** - Location-based loot pools (e.g., Burgershot bins yield food ingredients, Industrial zones yield ores)
+- **Custom Searchables** - Suitcases/luggage and mailboxes with unique loot and delete-on-search mechanics
 
 ### Technical
-- **Auto Database Setup** â€” SQL table created automatically on first startup
-- **Fully Configurable** â€” All values, loot tables, animations, and behaviors exposed in `config.lua`
-- **ox_lib Integration** â€” Context menus for stats, notifications, progress bars, and callbacks
-- **ox_target Support** â€” Smooth model-based interaction targeting
+- **Auto Database Setup** - SQL table created automatically on first startup
+- **Fully Configurable** - All values, loot tables, animations, and behaviors exposed in `config.lua`
+- **ox_lib Integration** - Context menus for stats, notifications, progress bars, and callbacks
+- **ox_target Support** - Smooth model-based interaction targeting
 
 ---
 
@@ -89,7 +89,7 @@ A premium, fully-optimized dumpster diving script for **FiveM** servers running 
    ensure qb-core  # or ensure qbx_core
    ensure vitrue-dumpster
    ```
-4. **Restart** your server â€” the database table is created automatically
+4. **Restart** your server - the database table is created automatically
 
 ---
 
@@ -245,9 +245,9 @@ When searching, players may encounter:
 The script automatically creates a `dumpster_reputation` table on startup. No manual SQL import required.
 
 **Table Schema:**
-- `citizenid` â€” Player identifier
-- `level` â€” Current progression level
-- `xp` â€” Total XP accumulated
+- `citizenid` - Player identifier
+- `level` - Current progression level
+- `xp` - Total XP accumulated
 
 ---
 
