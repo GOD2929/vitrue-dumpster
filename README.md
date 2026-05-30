@@ -90,6 +90,12 @@ A premium, fully-optimized dumpster diving script for **FiveM** servers running 
    ensure vitrue-dumpster
    ```
 4. **Restart** your server - the database table is created automatically
+5. **Inventory** ox_inventory - 
+   add 
+   ['hobo_gloves'] = {
+       label = 'Protective Gloves',
+       weight = 100,
+   },
 
 ---
 
