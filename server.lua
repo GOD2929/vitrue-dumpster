@@ -243,10 +243,9 @@ RegisterNetEvent('vitrue-dumpster:server:searchComplete', function(coords, categ
                 SetEntityHealth(ped, math.max(1, health - Config.Fails.DirtyNeedlesHealthLoss))
                 return
             elseif Config.Fails.EnableRatEvent and roll <= (Config.Fails.DirtyNeedlesChancePercent + Config.Fails.RatChancePercent) then
-                -- Rat event (or Raccoon)
-                local isRacoon = math.random(1, 100) <= Config.Fails.RacoonChancePercent
-                local damage = isRacoon and Config.Fails.RacoonHealthLoss or Config.Fails.RatHealthLoss
-                TriggerClientEvent('vitrue-dumpster:client:triggerRatEffect', src, isRacoon, damage)
+                -- Rat event
+                local damage = Config.Fails.RatHealthLoss
+                TriggerClientEvent('vitrue-dumpster:client:triggerRatEffect', src, damage)
                 local ped = GetPlayerPed(src)
                 local health = GetEntityHealth(ped)
                 SetEntityHealth(ped, math.max(1, health - damage))

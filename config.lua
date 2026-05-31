@@ -14,8 +14,6 @@ Config.Fails = {
     DirtyNeedlesHealthLoss = 10,
     HealthLoss = 0,
     RatHealthLoss = 5,
-    RacoonChancePercent = 5,
-    RacoonHealthLoss = 10,
 }
 
 -- Hostile Ped Settings
@@ -545,7 +543,6 @@ Config.Lang = {
     ['need_gloves'] = "You searched but got pricked by a needle! Some protective gloves would have helped...",
     ['needles'] = "You got pricked by a dirty needle! You feel dizzy...",
     ['rat'] = "A rat jumped out and bit you!",
-    ['racoon'] = "A raccoon attacked you!",
     ['trash_empty'] = "This trash is empty.",
     ['searching'] = "Searching trash...",
     ['fail'] = "You found nothing but trash...",

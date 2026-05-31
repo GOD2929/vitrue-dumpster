@@ -71,7 +71,7 @@ local function CheckForAggressivePeds(coords)
 end
 
 -- Raccoon/Rat Effect
-RegisterNetEvent('vitrue-dumpster:client:triggerRatEffect', function(isRacoon, healthLoss)
+RegisterNetEvent('vitrue-dumpster:client:triggerRatEffect', function(healthLoss)
     local ped = PlayerPedId()
     local dict = Config.RatFailAnim.dict
     local anim = Config.RatFailAnim.anim
@@ -79,10 +79,7 @@ RegisterNetEvent('vitrue-dumpster:client:triggerRatEffect', function(isRacoon, h
     loadAnimDict(dict)
     TaskPlayAnim(ped, dict, anim, 8.0, 8.0, -1, 49, 0, false, false, false)
     
-    local model = isRacoon and `enviraccoon` or `a_c_rat`
-    if isRacoon and not IsModelInCdimage(model) then
-        model = `a_c_rat` -- Fallback
-    end
+    local model = `a_c_rat`
     
     RequestModel(model)
     while not HasModelLoaded(model) do
@@ -102,7 +99,7 @@ RegisterNetEvent('vitrue-dumpster:client:triggerRatEffect', function(isRacoon, h
     
     lib.notify({
         title = 'Dumpster Diving',
-        description = isRacoon and Config.Lang['racoon'] or Config.Lang['rat'],
+        description = Config.Lang['rat'],
         type = 'error'
     })
     
