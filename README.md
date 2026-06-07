@@ -42,8 +42,8 @@ A premium, fully-optimized dumpster diving script for **FiveM** servers running 
 ### Immersive Gameplay
 - **Micro-Animations** - Unique search animations per trash type (dumpsters, bins, bags, suitcases, mailboxes)
 - **Event Hazards** - Rat bites, raccoon attacks, and dirty needle pricks with visual effects
-- **Protective Gear** - `hobo_gloves` item shields players from needle hazards
-- **Aggressive Tramps** - NPCs may attack players who dig through their territory
+- **Protective Gear** - `safety_gloves` item shields players from needle hazards
+- **Aggressive Peds** - Security, annoyed citizens, and stray dogs may confront/attack players who dig in their area
 
 ### Loot & Zones
 - **Multi-Tier Loot Tables** - Common and rare loot pools per category with configurable rarity thresholds
@@ -91,11 +91,20 @@ A premium, fully-optimized dumpster diving script for **FiveM** servers running 
    ```
 4. **Restart** your server - the database table is created automatically
 5. **Inventory** ox_inventory - 
-   add 
-   ['hobo_gloves'] = {
-       label = 'Protective Gloves',
+   add the items to `ox_inventory/data/items.lua`:
+   ```lua
+   ['safety_gloves'] = {
+       label = 'Safety Gloves',
        weight = 100,
    },
+   ['antibiotics'] = {
+       label = 'Antibiotics',
+       weight = 50,
+       client = {
+           export = 'vitrue-dumpster.useAntibiotics'
+       }
+   },
+   ```
 
 ---
 
@@ -187,7 +196,7 @@ Config.XP = {
 | **Garbage Bags** | `prop_rub_binbag_01b`, `prop_rub_binbag_04`, `prop_rub_binbag_06` | 1 |
 | **Garbage Cans** | `prop_bin_01a` through `prop_bin_12a` (19 variants) | 1 |
 | **Dumpsters** | `prop_cs_dumpster_01a`, `prop_dumpster_01a`, etc. (8 variants) | 3 |
-| **Tents / Other** | `prop_skid_tent_01`, `prop_skid_tent_01b`, `prop_skid_tent_03` | 2 |
+| **Campsites** | `prop_skid_tent_01`, `prop_skid_tent_01b`, `prop_skid_tent_03` | 2 |
 | **Suitcases** | `prop_suitcase_*`, `prop_luggage_*` (17 variants) | 5 |
 | **Mailboxes** | `prop_postbox_01a`, `prop_postbox_ss_01a` | 4 |
 
@@ -230,7 +239,7 @@ Location-based loot pools with unique rewards:
 | **Burgershot** | `-1179.7, -904.6, 13.5` | Food items (burgers, fries, drinks, ingredients) |
 | **Industrial** | `722.1, -729.4, 26.1` | Ores (iron, copper, silver, gold), wood, stone, coal |
 | **Grove** | `107.2, -1941.9, 20.8` | Drugs, electronics, lockpicks |
-| **SuperRareSpot** | `169.5, -1224.2, 29.3` | High-tier electronics, rare drugs, hobo weapons |
+| **SuperRareSpot** | `169.5, -1224.2, 29.3` | High-tier electronics, rare drugs, rare weapons |
 
 ---
 
@@ -242,7 +251,7 @@ When searching, players may encounter:
 |-------|---------|--------|
 | **Rat Bite** | Random chance | -5 HP, bite animation |
 | **Raccoon Attack** | Random chance | -10 HP, attack animation |
-| **Dirty Needle** | Random chance | -10 HP, 4 min dizzy effect (preventable with `hobo_gloves`) |
+| **Dirty Needle** | Random chance | -10 HP, 4 min dizzy effect (preventable with `safety_gloves`) |
 
 ---
 

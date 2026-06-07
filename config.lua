@@ -2,6 +2,8 @@ Config = {}
 
 Config.DebugMode = false
 Config.TrashCooldown = 5 -- The time in MINUTES a player must wait before searching the same trash again.
+Config.GlovesItem = 'safety_gloves'
+Config.AntibioticsItem = 'antibiotics'
 
 Config.Fails = {
     EnableFail = true,
@@ -16,31 +18,28 @@ Config.Fails = {
     RatHealthLoss = 5,
 }
 
--- Hostile Ped Settings
+-- Hostile Ped Settings (Security, Citizens, and Stray Dogs)
 Config.AggressivePedsAttack = true
 Config.AggressivePedDistance = 25 -- Meters
 Config.AggressivePeds = {
-    'a_m_m_tramp_01',
-    'a_m_m_trampbeac_01',
-    'A_M_M_Hillbilly_02',
-    'A_M_M_RurMeth_01',
-    'A_M_M_Salton_01',
-    'A_M_M_Salton_02',
-    'A_M_M_Salton_03',
-    'A_M_M_Salton_04',
-    'a_f_m_skidrow_01',
-    'a_f_m_trampbeac_01',
-    'a_f_o_salton_01',
-    'a_f_y_hippie_01',
-    'a_f_y_rurmeth_01',
-    'a_m_m_skidrow_01',
-    'a_m_o_tramp_01',
-    'a_m_o_beach_01',
-    'a_m_o_salton_01',
-    'a_m_o_soucent_02',
-    'a_m_o_soucent_03',
-    'a_m_y_methhead_01',
-    'a_m_y_salton_01',
+    -- Security Guards / Officers
+    's_m_m_security_01',
+    's_m_y_devinsec_01',
+    's_m_y_cop_01',
+    
+    -- Clerks / Shopkeepers / Annoyed Citizens
+    's_m_y_shopkeep_01',
+    's_m_y_clerk_01',
+    'a_m_m_business_01',
+    'a_m_y_business_01',
+    'a_m_m_malibu_01',
+    
+    -- Stray Dogs / Animals
+    'a_c_rottweiler',
+    'a_c_husky',
+    'a_c_retriever',
+    'a_c_shepherd',
+    'a_c_chop',
 }
 
 Config.AggressivePedWeapons = {
@@ -54,15 +53,16 @@ Config.AggressivePedWeapons = {
         Uncommon = { name = "WEAPON_KNIFE", ammo = 0 },
         Common = { name = "WEAPON_BOTTLE", ammo = 0 }
     },
-    GiveHoboWeapon = {
+    GiveMeleeWeapon = {
         enabled = true,
         chance = 20,
         weapons = {
-            "WEAPON_HOBO_PIPE",
-            "WEAPON_HOBO_PLANK",
-            "WEAPON_HOBO_OLDMACHETE",
-            "WEAPON_HOBO_STICK",
-            "WEAPON_HOBO_REBAR"
+            "WEAPON_NIGHTSTICK",
+            "WEAPON_CROWBAR",
+            "WEAPON_WRENCH",
+            "WEAPON_HAMMER",
+            "WEAPON_FLASHLIGHT",
+            "WEAPON_BAT"
         }
     }
 }
@@ -161,11 +161,11 @@ Config.DumpsterItemsRare = {
     {name = "uncut_emerald", min = 1, max = 1, rarity = 95},
     {name = "uncut_diamond", min = 1, max = 1, rarity = 97},
     {name = "clonedcard", min = 1, max = 1, rarity = 90},
-    {name = "WEAPON_HOBO_PIPE", min = 1, max = 1, rarity = 70},
-    {name = "WEAPON_HOBO_PLANK", min = 1, max = 1, rarity = 75},
-    {name = "WEAPON_HOBO_OLDMACHETE", min = 1, max = 1, rarity = 80},
-    {name = "WEAPON_HOBO_TOILET", min = 1, max = 1, rarity = 85},
-    {name = "WEAPON_HOBO_REBAR", min = 1, max = 1, rarity = 90},
+    {name = "WEAPON_CROWBAR", min = 1, max = 1, rarity = 70},
+    {name = "WEAPON_WRENCH", min = 1, max = 1, rarity = 75},
+    {name = "WEAPON_KNIFE", min = 1, max = 1, rarity = 80},
+    {name = "WEAPON_FLASHLIGHT", min = 1, max = 1, rarity = 85},
+    {name = "WEAPON_BAT", min = 1, max = 1, rarity = 90},
 }
 Config.DumpsterItemsRareChance = 12
 
@@ -204,12 +204,12 @@ Config.GarbageCanItemsRare = {
     {name = "aluminumoxide", min = 1, max = 3, rarity = 55},
     {name = "ironoxide", min = 1, max = 2, rarity = 60},
     {name = "clonedcard", min = 1, max = 1, rarity = 75},
-    {name = "WEAPON_HOBO_PIPE", min = 1, max = 1, rarity = 90},
-    {name = "WEAPON_HOBO_SPONGE", min = 1, max = 1, rarity = 95},
+    {name = "WEAPON_WRENCH", min = 1, max = 1, rarity = 90},
+    {name = "rubber", min = 1, max = 2, rarity = 95},
 }
 Config.GarbageCanItemsRareChance = 6
 
-Config.OtherSearchablesItems = {
+Config.CampsiteItems = {
     {name = "water_bottle", min = 1, max = 2, rarity = 40},
     {name = "condom", min = 1, max = 3, rarity = 55},
     {name = "tosti", min = 1, max = 2, rarity = 45},
@@ -230,7 +230,7 @@ Config.OtherSearchablesItems = {
     {name = "lighter", min = 1, max = 1, rarity = 75},
 }
 
-Config.OtherSearchablesItemsRare = {
+Config.CampsiteItemsRare = {
     {name = "lockpick", min = 1, max = 2, rarity = 60},
     {name = "advancedlockpick", min = 1, max = 1, rarity = 75},
     {name = "crack_baggy", min = 1, max = 3, rarity = 65},
@@ -244,11 +244,11 @@ Config.OtherSearchablesItemsRare = {
     {name = "aluminumoxide", min = 1, max = 3, rarity = 55},
     {name = "ironoxide", min = 1, max = 2, rarity = 60},
     {name = "clonedcard", min = 1, max = 1, rarity = 75},
-    {name = "WEAPON_HOBO_PLANK", min = 1, max = 1, rarity = 90},
-    {name = "WEAPON_HOBO_OLDMACHETE", min = 1, max = 1, rarity = 95},
-    {name = "WEAPON_HOBO_MOP", min = 1, max = 1, rarity = 98},
+    {name = "WEAPON_BAT", min = 1, max = 1, rarity = 90},
+    {name = "WEAPON_KNIFE", min = 1, max = 1, rarity = 95},
+    {name = "metalscrap", min = 1, max = 2, rarity = 98},
 }
-Config.OtherSearchablesItemsRareChance = 3
+Config.CampsiteItemsRareChance = 3
 
 Config.GarbageBagsItems = {
     {name = "water_bottle", min = 1, max = 2, rarity = 40},
@@ -285,8 +285,8 @@ Config.GarbageBagsItemsRare = {
     {name = "aluminumoxide", min = 1, max = 3, rarity = 55},
     {name = "ironoxide", min = 1, max = 2, rarity = 60},
     {name = "clonedcard", min = 1, max = 1, rarity = 75},
-    {name = "WEAPON_HOBO_PLANK", min = 1, max = 1, rarity = 90},
-    {name = "WEAPON_HOBO_SHARD", min = 1, max = 1, rarity = 95},
+    {name = "WEAPON_BAT", min = 1, max = 1, rarity = 90},
+    {name = "WEAPON_KNIFE", min = 1, max = 1, rarity = 95},
 }
 Config.GarbageBagsItemsRareChance = 8
 
@@ -377,8 +377,8 @@ Config.ExclusiveItemZones = {
             {name = "aluminumoxide", min = 1, max = 3, rarity = 55},
             {name = "ironoxide", min = 1, max = 2, rarity = 60},
             {name = "clonedcard", min = 1, max = 1, rarity = 75},
-            {name = "WEAPON_HOBO_PLANK", min = 1, max = 1, rarity = 90},
-            {name = "WEAPON_HOBO_SHARD", min = 1, max = 1, rarity = 95},
+            {name = "WEAPON_BAT", min = 1, max = 1, rarity = 90},
+            {name = "WEAPON_KNIFE", min = 1, max = 1, rarity = 95},
         },
     },
     {
@@ -401,8 +401,8 @@ Config.ExclusiveItemZones = {
             {name = "aluminumoxide", min = 1, max = 3, rarity = 55},
             {name = "ironoxide", min = 1, max = 2, rarity = 60},
             {name = "clonedcard", min = 1, max = 1, rarity = 75},
-            {name = "WEAPON_HOBO_PLANK", min = 1, max = 1, rarity = 90},
-            {name = "WEAPON_HOBO_SHARD", min = 1, max = 1, rarity = 95},
+            {name = "WEAPON_BAT", min = 1, max = 1, rarity = 90},
+            {name = "WEAPON_KNIFE", min = 1, max = 1, rarity = 95},
         },
     }
 }
@@ -448,7 +448,7 @@ Config.GarbageCans = {
     "zprop_bin_01a_old",
 }
 
-Config.OtherSearchables = {
+Config.Campsites = {
     "prop_skid_tent_01",
     "prop_skid_tent_01b",
     "prop_skid_tent_03",
@@ -540,13 +540,22 @@ Config.TrashBagAnims = {
 
 -- Language strings
 Config.Lang = {
-    ['need_gloves'] = "You searched but got pricked by a needle! Some protective gloves would have helped...",
+    ['need_gloves'] = "You searched but got pricked by a sharp object! Some safety gloves would have helped...",
     ['needles'] = "You got pricked by a dirty needle! You feel dizzy...",
     ['rat'] = "A rat jumped out and bit you!",
     ['trash_empty'] = "This trash is empty.",
     ['searching'] = "Searching trash...",
     ['fail'] = "You found nothing but trash...",
-    ['aggressive_ped'] = "Hey! Stay away from my trash!",
+    ['aggressive_ped'] = "Hey! Get away from there!",
+    ['infected'] = "You feel a burning sensation... you have contracted an infection!",
+    ['cure_infection'] = "You took antibiotics and cleared the infection.",
+    ['found_compartment'] = "You notice a false bottom in this container...",
+    ['prying_compartment'] = "Prying open hidden compartment...",
+    ['pry_success'] = "You successfully pried it open and found extra stash!",
+    ['pry_fail'] = "You failed to pry it open...",
+    ['tool_broken'] = "Your %s broke while prying!",
+    ['loot_damaged'] = "You pried it open, but some items were damaged in the process...",
+    ['no_tool'] = "You need a Crowbar, Lockpick, or Screwdriver to pry this open!",
 }
 
 -- Database and Progression configurations
@@ -558,7 +567,7 @@ Config.LevelRequirements = {
     bag = 1,
     garbage = 1,
     dumpster = 3,
-    other = 2,
+    campsite = 2,
     Custom = {
         [1] = 5, -- Suitcase/Luggage
         [2] = 4, -- Mailbox
@@ -589,6 +598,78 @@ Config.XP = {
         [13] = 15400,
         [14] = 18300,
         [15] = 21500,
+    }
+}
+
+-- Disease & Infection Settings
+Config.Disease = {
+    InfectChanceOnFail = 30, -- 30% chance of getting infected on rat bite or needle prick
+    HealthDrain = 1,          -- Amount of HP to drain per interval
+    DrainInterval = 30,      -- Seconds between health drains
+}
+
+-- Hidden Compartments & Tool Prying Settings
+Config.HiddenCompartments = {
+    TriggerChance = 10, -- 10% chance to trigger a hidden compartment check on search success
+    
+    Tools = {
+        ['weapon_crowbar'] = {
+            label = 'Crowbar',
+            pryTime = 5000,          -- ms
+            alertChance = 100,      -- Always alerts nearby hostile peds/security/dogs
+            breakChance = 0,        -- Crowbars don't break
+            damageLootChance = 0,
+        },
+        ['lockpick'] = {
+            label = 'Lockpick',
+            pryTime = 12000,
+            alertChance = 0,
+            breakChance = 15,       -- 15% chance to break on use
+            damageLootChance = 0,
+        },
+        ['screwdriver'] = {
+            label = 'Screwdriver',
+            pryTime = 8000,
+            alertChance = 0,
+            breakChance = 20,       -- 20% chance to break
+            damageLootChance = 20,  -- 20% chance to damage/destroy some loot
+        }
+    },
+    ToolAliases = {
+        Crowbar = { 'weapon_crowbar', 'WEAPON_CROWBAR' },
+        Lockpick = { 'lockpick' },
+        Screwdriver = { 'screwdriver' },
+    },
+    
+    -- Special loot drops when successfully prying a hidden compartment
+    Loot = {
+        {name = "money", min = 100, max = 500, rarity = 40},
+        {name = "goldwatch", min = 1, max = 2, rarity = 60},
+        {name = "goldbar", min = 1, max = 1, rarity = 80},
+        {name = "cryptostick", min = 1, max = 1, rarity = 85},
+    }
+}
+
+-- Dynamic Loot & Environment Modifiers
+Config.DynamicLoot = {
+    NightTimeStart = 21, -- 9 PM (21:00)
+    NightTimeEnd = 5,    -- 5 AM (05:00)
+    
+    NightRareChanceModifier = 10, -- +10% rare chance for night searches
+    RainRareChanceModifier = 5,   -- +5% rare chance in rain
+    
+    -- Items added specifically for night-time searches
+    NightOnlyLoot = {
+        {name = "lockpick", min = 1, max = 2, rarity = 50},
+        {name = "crack_baggy", min = 1, max = 3, rarity = 60},
+        {name = "samsungphone", min = 1, max = 1, rarity = 70},
+        {name = "iphone", min = 1, max = 1, rarity = 75},
+    },
+    
+    -- Items added specifically for rainy searches
+    RainOnlyLoot = {
+        {name = "money", min = 5, max = 25, rarity = 40}, -- loose change washed down
+        {name = "lighter", min = 1, max = 1, rarity = 60},
     }
 }
 

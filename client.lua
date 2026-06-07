@@ -1,13 +1,18 @@
-local QBCore = exports['qb-core']:GetCoreObject()
 local isSearching = false
 local drugged = false
+local searchModelHashes = nil
 
 -- Load animation dictionary utility
 local function loadAnimDict(dict)
+    local timeout = GetGameTimer() + 5000
+    RequestAnimDict(dict)
     while not HasAnimDictLoaded(dict) do
-        RequestAnimDict(dict)
+        if GetGameTimer() > timeout then
+            return false
+        end
         Wait(5)
     end
+    return true
 end
 
 -- Aggressive Ped Logic
@@ -19,40 +24,42 @@ local function CheckForAggressivePeds(coords)
         local targetPed = peds[i]
         if targetPed ~= ped and not IsPedAPlayer(targetPed) and not IsEntityDead(targetPed) then
             local targetModel = GetEntityModel(targetPed)
-            local isTramp = false
+            local isHostile = false
             for _, model in ipairs(Config.AggressivePeds) do
                 if targetModel == GetHashKey(model) then
-                    isTramp = true
+                    isHostile = true
                     break
                 end
             end
-            if isTramp then
+            if isHostile then
                 local dist = #(coords - GetEntityCoords(targetPed))
                 if dist <= Config.AggressivePedDistance then
                     ClearPedTasksImmediately(targetPed)
-                    TaskPlayAnim(targetPed, "amb@world_human_bum_wash@male@high@idle_a", "idle_b", 8.0, -8.0, -1, 0, 0, false, false, false)
-                    PlayAmbientSpeech1(targetPed, "GENERIC_CURSE_HIGH", "SPEECH_PARAMS_FORCE_SHOUT")
                     
-                    -- Handle Hobo Weapon Spawn
-                    if Config.AggressivePedWeapons.GiveHoboWeapon.enabled then
-                        local chance = math.random(1, 100)
-                        if chance <= Config.AggressivePedWeapons.GiveHoboWeapon.chance then
-                            local weapon = Config.AggressivePedWeapons.GiveHoboWeapon.weapons[math.random(1, #Config.AggressivePedWeapons.GiveHoboWeapon.weapons)]
-                            GiveWeaponToPed(targetPed, GetHashKey(weapon), 1, false, true)
-                            SetCurrentPedWeapon(targetPed, GetHashKey(weapon), true)
-                        else
-                            local weaponChance = math.random(1, 100)
-                            local weaponType = nil
-                            if weaponChance >= Config.AggressivePedWeapons.ChanceThresholds.Rare then
-                                weaponType = Config.AggressivePedWeapons.Weapons.Rare
-                            elseif weaponChance >= Config.AggressivePedWeapons.ChanceThresholds.Uncommon then
-                                weaponType = Config.AggressivePedWeapons.Weapons.Uncommon
-                            elseif weaponChance >= Config.AggressivePedWeapons.ChanceThresholds.Common then
-                                weaponType = Config.AggressivePedWeapons.Weapons.Common
-                            end
-                            if weaponType then
-                                GiveWeaponToPed(targetPed, GetHashKey(weaponType.name), weaponType.ammo, false, true)
-                                SetCurrentPedWeapon(targetPed, GetHashKey(weaponType.name), true)
+                    if IsPedHuman(targetPed) then
+                        PlayAmbientSpeech1(targetPed, "GENERIC_CURSE_HIGH", "SPEECH_PARAMS_FORCE_SHOUT")
+                        
+                        -- Handle Melee Weapon Spawn (Only for human peds)
+                        if Config.AggressivePedWeapons.GiveMeleeWeapon.enabled then
+                            local chance = math.random(1, 100)
+                            if chance <= Config.AggressivePedWeapons.GiveMeleeWeapon.chance then
+                                local weapon = Config.AggressivePedWeapons.GiveMeleeWeapon.weapons[math.random(1, #Config.AggressivePedWeapons.GiveMeleeWeapon.weapons)]
+                                GiveWeaponToPed(targetPed, GetHashKey(weapon), 1, false, true)
+                                SetCurrentPedWeapon(targetPed, GetHashKey(weapon), true)
+                            else
+                                local weaponChance = math.random(1, 100)
+                                local weaponType = nil
+                                if weaponChance >= Config.AggressivePedWeapons.ChanceThresholds.Rare then
+                                    weaponType = Config.AggressivePedWeapons.Weapons.Rare
+                                elseif weaponChance >= Config.AggressivePedWeapons.ChanceThresholds.Uncommon then
+                                    weaponType = Config.AggressivePedWeapons.Weapons.Uncommon
+                                elseif weaponChance >= Config.AggressivePedWeapons.ChanceThresholds.Common then
+                                    weaponType = Config.AggressivePedWeapons.Weapons.Common
+                                end
+                                if weaponType then
+                                    GiveWeaponToPed(targetPed, GetHashKey(weaponType.name), weaponType.ammo, false, true)
+                                    SetCurrentPedWeapon(targetPed, GetHashKey(weaponType.name), true)
+                                end
                             end
                         end
                     end
@@ -80,19 +87,32 @@ RegisterNetEvent('vitrue-dumpster:client:triggerRatEffect', function(healthLoss)
     TaskPlayAnim(ped, dict, anim, 8.0, 8.0, -1, 49, 0, false, false, false)
     
     local model = `a_c_rat`
-    
-    RequestModel(model)
-    while not HasModelLoaded(model) do
-        Wait(0)
+    if IsModelInCdimage(model) then
+        RequestModel(model)
+        local timeout = 100 -- 1 second timeout
+        while not HasModelLoaded(model) and timeout > 0 do
+            Wait(10)
+            timeout = timeout - 1
+        end
+        
+        if HasModelLoaded(model) then
+            local coords = GetEntityCoords(ped)
+            local forward = GetEntityForwardVector(ped)
+            local spawnCoords = coords + forward * 0.3
+            -- Spawn local entity (false for isNetworked) to reduce OneSync traffic
+            local spawnPed = CreatePed(4, model, spawnCoords.x, spawnCoords.y, spawnCoords.z, GetEntityHeading(ped), false, false)
+            
+            TaskSmartFleePed(spawnPed, ped, 50.0, -1, false, false)
+            SetPedAsNoLongerNeeded(spawnPed)
+            
+            -- Cleanup ped
+            SetTimeout(30000, function()
+                if DoesEntityExist(spawnPed) then
+                    DeletePed(spawnPed)
+                end
+            end)
+        end
     end
-    
-    local coords = GetEntityCoords(ped)
-    local forward = GetEntityForwardVector(ped)
-    local spawnCoords = coords + forward * 0.3
-    local spawnPed = CreatePed(4, model, spawnCoords.x, spawnCoords.y, spawnCoords.z, GetEntityHeading(ped), true, false)
-    
-    TaskSmartFleePed(spawnPed, ped, 50.0, -1, false, false)
-    SetPedAsNoLongerNeeded(spawnPed)
     
     Wait(2000)
     ClearPedTasks(ped)
@@ -102,13 +122,6 @@ RegisterNetEvent('vitrue-dumpster:client:triggerRatEffect', function(healthLoss)
         description = Config.Lang['rat'],
         type = 'error'
     })
-    
-    -- Cleanup ped
-    SetTimeout(30000, function()
-        if DoesEntityExist(spawnPed) then
-            DeletePed(spawnPed)
-        end
-    end)
 end)
 
 -- Dirty Needle Effect
@@ -148,11 +161,25 @@ end)
 -- Main Search Function
 local function StartDumpsterSearch(data, category, customIndex)
     if isSearching then return end
+    isSearching = true
+
     local ped = PlayerPedId()
     local entity = data.entity
-    if not DoesEntityExist(entity) then return end
+    if not DoesEntityExist(entity) then
+        isSearching = false
+        return
+    end
+
+    if category == 'custom' and (not customIndex or not Config.CustomSearchables[customIndex]) then
+        isSearching = false
+        return
+    end
     
     local coords = GetEntityCoords(entity)
+    local model = GetEntityModel(entity)
+    local netId = NetworkGetNetworkIdFromEntity(entity)
+    if netId == 0 then netId = nil end
+
     local roundedCoords = vector3(
         math.floor(coords.x * 10) / 10,
         math.floor(coords.y * 10) / 10,
@@ -160,17 +187,16 @@ local function StartDumpsterSearch(data, category, customIndex)
     )
     
     -- Check Cooldown and Level Requirements on Server
-    local canSearch, reason = lib.callback.await('vitrue-dumpster:server:canSearch', false, roundedCoords, category, customIndex)
+    local canSearch, reason = lib.callback.await('vitrue-dumpster:server:canSearch', false, roundedCoords, category, customIndex, model, netId)
     if not canSearch then
         lib.notify({
             title = 'Dumpster Diving',
             description = reason or Config.Lang['trash_empty'],
             type = 'error'
         })
+        isSearching = false
         return
     end
-    
-    isSearching = true
     
     -- Pick Random Animation based on category
     local anims = Config.DumpsterAnims
@@ -190,40 +216,36 @@ local function StartDumpsterSearch(data, category, customIndex)
     -- Check for Aggressive Peds nearby
     CheckForAggressivePeds(coords)
     
-    -- Progress Bar
     local searchDuration = math.random(10000, 13000)
     
-    exports['progressbar']:Progress({
-        name = "searching_dumpster",
+    local completed = lib.progressBar({
         duration = searchDuration,
         label = Config.Lang['searching'],
         useWhileDead = false,
         canCancel = true,
-        disarm = true,
-        controlDisables = {
-            disableMovement = true,
-            disableCarMovement = true,
-            disableMouse = false,
-            disableCombat = true,
+        disable = {
+            move = true,
+            car = true,
+            combat = true,
         },
-        animation = {
-            animDict = chosenAnim.dict,
-            anim = chosenAnim.anim,
-            flags = 49,
+        anim = {
+            dict = chosenAnim.dict,
+            clip = chosenAnim.anim,
+            flag = 49,
         }
-    }, function(cancelled)
-        isSearching = false
-        ClearPedTasks(ped)
-        if not cancelled then
-            TriggerServerEvent('vitrue-dumpster:server:searchComplete', roundedCoords, category, customIndex)
-            
-            -- If custom searchable is set to delete prop, delete it on complete
-            if category == 'custom' and customIndex and Config.CustomSearchables[customIndex].deleteProp then
-                SetEntityAsMissionEntity(entity, true, true)
-                DeleteEntity(entity)
-            end
+    })
+
+    isSearching = false
+    ClearPedTasks(ped)
+    if completed then
+        TriggerServerEvent('vitrue-dumpster:server:searchComplete', roundedCoords, category, customIndex, model, netId)
+        
+        -- If custom searchable is set to delete prop, delete it on complete
+        if category == 'custom' and customIndex and Config.CustomSearchables[customIndex].deleteProp then
+            SetEntityAsMissionEntity(entity, true, true)
+            DeleteEntity(entity)
         end
-    end)
+    end
 end
 
 -- Initialize ox_target model registration
@@ -264,14 +286,14 @@ CreateThread(function()
         }
     })
     
-    -- Other Searchables
-    exports.ox_target:addModel(Config.OtherSearchables, {
+    -- Campsites
+    exports.ox_target:addModel(Config.Campsites, {
         {
-            name = 'search_other',
-            icon = 'fa-solid fa-dumpster',
-            label = 'Search Prop',
+            name = 'search_campsite',
+            icon = 'fa-solid fa-campground',
+            label = 'Search Campsite',
             onSelect = function(data)
-                StartDumpsterSearch(data, 'other')
+                StartDumpsterSearch(data, 'campsite')
             end
         }
     })
@@ -384,9 +406,9 @@ RegisterNetEvent('vitrue-dumpster:client:openUnlocks', function()
         iconColor = '#fb8500'
     }
     options[#options + 1] = {
-        title = 'Other Searchables',
-        description = formatReq(req.other or 1),
-        icon = 'box-open',
+        title = 'Campsites',
+        description = formatReq(req.campsite or 1),
+        icon = 'campground',
         iconColor = '#8ecae6'
     }
     
@@ -394,7 +416,7 @@ RegisterNetEvent('vitrue-dumpster:client:openUnlocks', function()
     for i, cs in ipairs(Config.CustomSearchables) do
         options[#options + 1] = {
             title = cs.label or ('Custom ' .. i),
-            description = formatReq(req.custom and req.custom[i] or 1),
+            description = formatReq(req.Custom and req.Custom[i] or 1),
             icon = 'magnifying-glass',
             iconColor = '#2a9d8f'
         }
@@ -412,3 +434,252 @@ end)
 RegisterCommand('dumpsterstats', function()
     TriggerEvent('vitrue-dumpster:client:openStats')
 end, false)
+
+-- ==========================================
+-- New Features: Disease & Hidden Compartments
+-- ==========================================
+
+-- Cough Animation Helper
+local function PlayCoughAnimation()
+    local ped = PlayerPedId()
+    loadAnimDict("amb@code_human_in_car_mp_actions@cough@std@ps@base")
+    TaskPlayAnim(ped, "amb@code_human_in_car_mp_actions@cough@std@ps@base", "enter", 8.0, 8.0, 3000, 49, 0, false, false, false)
+    PlayAmbientSpeech1(ped, "GENERIC_COUGH", "SPEECH_PARAMS_FORCE")
+end
+
+-- Sickness / Infection Active Thread
+CreateThread(function()
+    while true do
+        if LocalPlayer.state.sanitationInfected then
+            local ped = PlayerPedId()
+            if not IsEntityDead(ped) then
+                local health = GetEntityHealth(ped)
+                -- Let's drain health but not instantly kill, or let it down them based on standard GTA health (0 is dead, on some servers 100 is dead. Let's use math.max(0) to allow standard downing/death).
+                SetEntityHealth(ped, math.max(0, health - Config.Disease.HealthDrain))
+                
+                -- Sickness visual effects
+                ShakeGameplayCam("SMALL_EXPLOSION_SHAKE", 0.08)
+                PlayCoughAnimation()
+                
+                lib.notify({
+                    title = 'Sickness',
+                    description = "You feel weak and cough heavily from the infection...",
+                    type = 'error'
+                })
+            end
+            Wait(Config.Disease.DrainInterval * 1000)
+        else
+            Wait(2000)
+        end
+    end
+end)
+
+-- Notify client on infection start
+AddStateBagChangeHandler("sanitationInfected", nil, function(bagName, key, value, reserved, replicated)
+    local ply = GetPlayerFromStateBagName(bagName)
+    if ply == PlayerId() then
+        if value then
+            lib.notify({
+                title = 'Sickness',
+                description = Config.Lang['infected'],
+                type = 'error',
+                duration = 7000
+            })
+        end
+    end
+end)
+
+-- Find closest searchable entity to coords helper
+local function FindSearchableEntityAtCoords(coords)
+    if not searchModelHashes then
+        searchModelHashes = {}
+        for _, model in ipairs(Config.BeachCans) do searchModelHashes[#searchModelHashes + 1] = GetHashKey(model) end
+        for _, model in ipairs(Config.Dumpsters) do searchModelHashes[#searchModelHashes + 1] = GetHashKey(model) end
+        for _, model in ipairs(Config.GarbageCans) do searchModelHashes[#searchModelHashes + 1] = GetHashKey(model) end
+        for _, model in ipairs(Config.Campsites) do searchModelHashes[#searchModelHashes + 1] = GetHashKey(model) end
+        for _, model in ipairs(Config.TrashBagModels) do searchModelHashes[#searchModelHashes + 1] = GetHashKey(model) end
+        for _, cs in ipairs(Config.CustomSearchables) do
+            for _, model in ipairs(cs.models) do
+                searchModelHashes[#searchModelHashes + 1] = GetHashKey(model)
+            end
+        end
+    end
+    
+    for _, model in ipairs(searchModelHashes) do
+        local entity = GetClosestObjectOfType(coords.x, coords.y, coords.z, 2.0, model, false, false, false)
+        if DoesEntityExist(entity) then
+            return entity
+        end
+    end
+    return nil
+end
+
+-- Event: Hidden Compartment Found
+RegisterNetEvent('vitrue-dumpster:client:foundCompartment', function(coords)
+    local entity = FindSearchableEntityAtCoords(coords)
+    if not entity or not DoesEntityExist(entity) then return end
+    
+    lib.notify({
+        title = 'Dumpster Diving',
+        description = Config.Lang['found_compartment'],
+        type = 'success',
+        duration = 6000
+    })
+    
+    -- Register target option for this specific local entity
+    exports.ox_target:addLocalEntity(entity, {
+        {
+            name = 'pry_hidden_compartment',
+            icon = 'fa-solid fa-screwdriver',
+            label = 'Pry Open Hidden Compartment',
+            onSelect = function(data)
+                -- Call local handler passing entity and coords
+                TriggerEvent('vitrue-dumpster:client:pryCompartmentMenu', data.entity, coords)
+            end
+        }
+    })
+end)
+
+-- Helper: Start Prying Compartment
+local function StartPryCompartment(entity, coords, tool)
+    local toolConfig = Config.HiddenCompartments.Tools[tool] or Config.HiddenCompartments.Tools[string.lower(tostring(tool))]
+    if not toolConfig then return end
+    
+    -- Check if tool is still in inventory
+    local toolCount = exports.ox_inventory:Search('count', tool)
+    if toolCount <= 0 then
+        lib.notify({
+            title = 'Compartment',
+            description = "You no longer have this tool!",
+            type = 'error'
+        })
+        return
+    end
+    
+    local ped = PlayerPedId()
+    
+    -- Alert nearby peds immediately if loud tool (Crowbar)
+    if toolConfig.alertChance >= 100 then
+        CheckForAggressivePeds(coords)
+    end
+    
+    local animDict = "anim@gangops@facility@servers@bodysearch@"
+    local animName = "player_search"
+    local normalizedTool = string.lower(tostring(tool))
+    if normalizedTool == 'weapon_crowbar' then
+        animDict = "amb@world_human_hammering@male@base"
+        animName = "base"
+    elseif normalizedTool == 'screwdriver' then
+        animDict = "amb@medic@standing@tendtodead@idle_a"
+        animName = "idle_a"
+    end
+    
+    loadAnimDict(animDict)
+    
+    local completed = lib.progressBar({
+        duration = toolConfig.pryTime,
+        label = Config.Lang['prying_compartment'],
+        useWhileDead = false,
+        canCancel = true,
+        disable = {
+            move = true,
+            car = true,
+            combat = true,
+        },
+        anim = {
+            dict = animDict,
+            clip = animName,
+            flag = 49,
+        }
+    })
+
+    ClearPedTasks(ped)
+    if completed then
+        TriggerServerEvent('vitrue-dumpster:server:pryCompartment', coords, tool)
+        exports.ox_target:removeLocalEntity(entity, 'pry_hidden_compartment')
+    end
+end
+
+-- Register Menu Event
+RegisterNetEvent('vitrue-dumpster:client:pryCompartmentMenu', function(entity, coords)
+    local function firstAvailableItem(items)
+        for _, itemName in ipairs(items) do
+            if exports.ox_inventory:Search('count', itemName) > 0 then
+                return itemName
+            end
+        end
+        return nil
+    end
+
+    local crowbarItem = firstAvailableItem(Config.HiddenCompartments.ToolAliases.Crowbar)
+    local lockpickItem = firstAvailableItem(Config.HiddenCompartments.ToolAliases.Lockpick)
+    local screwdriverItem = firstAvailableItem(Config.HiddenCompartments.ToolAliases.Screwdriver)
+    
+    if not crowbarItem and not lockpickItem and not screwdriverItem then
+        lib.notify({
+            title = 'Compartment',
+            description = Config.Lang['no_tool'],
+            type = 'error'
+        })
+        return
+    end
+    
+    local options = {}
+    if crowbarItem then
+        options[#options + 1] = {
+            title = 'Pry with Crowbar',
+            description = 'Fast (5s), but loud (alerts nearby guards/dogs)',
+            icon = 'hammer',
+            onSelect = function()
+                StartPryCompartment(entity, coords, crowbarItem)
+            end
+        }
+    end
+    if lockpickItem then
+        options[#options + 1] = {
+            title = 'Pick with Lockpick',
+            description = 'Silent, but slow (12s) and may break (15% chance)',
+            icon = 'key',
+            onSelect = function()
+                StartPryCompartment(entity, coords, lockpickItem)
+            end
+        }
+    end
+    if screwdriverItem then
+        options[#options + 1] = {
+            title = 'Unscrew with Screwdriver',
+            description = 'Medium (8s), quiet, but may damage items (20% chance)',
+            icon = 'screwdriver',
+            onSelect = function()
+                StartPryCompartment(entity, coords, screwdriverItem)
+            end
+        }
+    end
+    
+    lib.registerContext({
+        id = 'pry_compartment_menu',
+        title = 'Pry Hidden Compartment',
+        options = options
+    })
+    lib.showContext('pry_compartment_menu')
+end)
+
+-- Event: Take Antibiotics
+RegisterNetEvent('vitrue-dumpster:client:useAntibiotics', function()
+    local ped = PlayerPedId()
+    loadAnimDict("amb@world_human_drinking@coffee@male@base")
+    TaskPlayAnim(ped, "amb@world_human_drinking@coffee@male@base", "base", 8.0, 8.0, 3000, 49, 0, false, false, false)
+    
+    lib.progressBar({
+        duration = 3000,
+        label = "Taking Antibiotics...",
+        useWhileDead = false,
+        canCancel = false,
+        disable = {
+            move = true,
+            car = true,
+            combat = true,
+        }
+    })
+    ClearPedTasks(ped)
+end)
